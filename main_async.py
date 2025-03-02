@@ -17,6 +17,13 @@ class Table1(Base):
     name = Column(String, nullable=False)
     age = Column(Integer, nullable=False)
 
+# Define the Table2 model
+class Table2(Base):
+    __tablename__ = 'Table2'
+    id = Column(Integer, primary_key=True)
+    description = Column(String, nullable=False)
+
+
 # Define the async Database class
 class Database:
     def __init__(self, db_url: str):

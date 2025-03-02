@@ -1,0 +1,10 @@
+Generic single-database configuration.
+https://alembic.sqlalchemy.org/en/latest/tutorial.html
+https://redkb.readthedocs.io/en/latest/programming/standard-project-files/python/alembic/index.html
+
+
+this seems to only work with sync. I cannot get the autogenerate working with async
+```
+alembic init alembic
+alembic revision --autogenerate -m 'initial version'
+```

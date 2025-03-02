@@ -16,6 +16,7 @@ class Table1(Base):
     id = Column(Integer, primary_key=True)
     name = Column(String, nullable=False)
     age = Column(Integer, nullable=False)
+    description = Column(String, nullable=False)
 
 # Define the Table2 model
 class Table2(Base):

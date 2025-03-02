@@ -1,47 +1,48 @@
+
+# database.py
 import asyncio
-from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_sessionmaker
+import os
+import subprocess
+from sqlalchemy import Column, Integer, String
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy import Column, Integer, String, Sequence
+from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_sessionmaker
+from sqlalchemy.orm import declarative_base
 
 Base = declarative_base()
 
+# Define the Table1 model
 class Table1(Base):
-    __tablename__ = 'table_1'
-    id = Column(Integer, Sequence('id'), primary_key=True)
-    name = Column(String(50))
-    value = Column(Integer)
-    tag = Column(String)
+    __tablename__ = 'Table1'
+    id = Column(Integer, primary_key=True)
+    name = Column(String, nullable=False)
+    age = Column(Integer, nullable=False)
 
-class Table2(Base):
-    __tablename__ = 'table_2'
-    id = Column(Integer, Sequence('id'), primary_key=True)
-    name = Column(String(50))
-    value = Column(Integer)
-
-
+# Define the async Database class
 class Database:
-    def __init__(self, database_url: str):
-        self._engine = create_async_engine(database_url, echo=True)
-        self._session = async_sessionmaker(
-            self._engine,
-            class_=AsyncSession,
-            expire_on_commit=False
-        )
+    def __init__(self, db_url: str):
+        self.engine = create_async_engine(db_url, echo=True)
+        self.AsyncSession = async_sessionmaker(self.engine, class_=AsyncSession, expire_on_commit=False)
 
-    async def init_db(self):
-        async with self._engine.begin() as conn:
+    async def create_tables(self):
+        async with self.engine.begin() as conn:
             await conn.run_sync(Base.metadata.create_all)
 
-    async def add_value(self, name: str, value: int):
-        async with self._session() as session:
-            async with session.begin():
-                new_item = Table1(name=name, value=value)
-                session.add(new_item)
-                await session.commit()
+    async def drop_tables(self):
+        async with self.engine.begin() as conn:
+            await conn.run_sync(Base.metadata.drop_all)
 
+    async def run_migrations(self):
+        # Run Alembic migrations
+        # alembic_path = os.path.join(os.path.dirname(__file__), 'alembic')
+        alembic_path = os.path.join(os.path.dirname(__file__))
+        subprocess.call(['alembic', '-c', f'{alembic_path}/alembic.ini', 'upgrade', 'head'])
+
+# Usage example
 async def main():
-    db = Database('sqlite+aiosqlite:///foo_async.sqlite')
-    await db.init_db()
-    await db.add_value('Example', 123)
+    db = Database("sqlite+aiosqlite:///db_async.db")
+    await db.create_tables()
+    await db.run_migrations()
+    print("Tables created and migrations applied successfully!")
 
-asyncio.run(main())
+if __name__ == "__main__":
+    asyncio.run(main())

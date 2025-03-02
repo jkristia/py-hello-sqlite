@@ -1,4 +1,3 @@
-#directly copied from copilot
 # database.py
 import os
 import subprocess
